@@ -41,6 +41,7 @@ class _CounterScreenState extends State<CounterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.deepPurple.shade50,
       appBar: AppBar(
         title: const Text('My First Flutter App'),
         backgroundColor: Colors.deepPurple,
