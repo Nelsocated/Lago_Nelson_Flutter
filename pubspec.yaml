@@ -23,3 +23,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/Me.JPEG
+  fonts:
+    - family: roboto
+      fonts:
+        - asset: assets/fonts/RobotoSlab-VariableFont_wght.ttf

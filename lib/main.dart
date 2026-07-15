@@ -11,39 +11,23 @@ class ProfileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('My Profile')),
-        body: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProfileCard(),
-              SizedBox(height: 16),
-              StatsRow(),
-              SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'About Me',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'BSSE student learning about mobile app development\n'
-                        'I want to sleep gahhhhh!',
-                      ),
-                    ],
-                  ),
-                ),
+        backgroundColor: Colors.lightBlueAccent,
+        appBar: AppBar(
+          title: const Text('My Profile'),
+          backgroundColor: Colors.blue,
+        ),
+        body: Center(
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [ProfileCard(), StatsRow()],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -56,39 +40,49 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            CircleAvatar(radius: 30, child: Icon(Icons.person, size: 32)),
-            SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Nelson Lago III',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Software Engineering Student',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                Text(
-                  'lagonelson77@gmail.com',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Transform.translate(
+          offset: Offset(0, -70),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/Me.JPEG',
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
         ),
-      ),
+        Transform.translate(
+          offset: Offset(0, -60),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Nelson Lago III',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade500,
+                  fontFamily: 'roboto',
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Software Engineering Student',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              Text(
+                'I want Coffee gahhhh.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -97,24 +91,23 @@ class StatsRow extends StatelessWidget {
   const StatsRow({super.key});
 
   Widget _statCard(String value, String label) {
-    return Expanded(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(label, style: const TextStyle(fontSize: 12)),
-            ],
-          ),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.lightBlue, width: 0.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center, // add this
+          children: [
+            Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(label, style: const TextStyle(fontSize: 12)),
+          ],
         ),
       ),
     );
@@ -124,11 +117,40 @@ class StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 320,
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _statCard('12', 'Posts'),
-          _statCard('340', 'Followers'),
-          _statCard('180', 'Following'),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _statCard('12', 'Posts')),
+                  Expanded(child: _statCard('340', 'Followers')),
+                  Expanded(child: _statCard('180', 'Following')),
+                ],
+              ),
+              SizedBox(height: 5),
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: Colors.blue.shade500,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Center(
+                      child: Text(
+                        'Edit Profile',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
