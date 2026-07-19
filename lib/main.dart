@@ -11,16 +11,19 @@ class ProfileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: Color(0xFF1D546D),
         appBar: AppBar(
           title: const Text('My Profile'),
-          backgroundColor: Colors.blue,
+          backgroundColor: Color(0xFF1D546D),
         ),
         body: Center(
           child: Card(
+            elevation: 10,
+            shadowColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
+            color: Color(0xFFF3F4F4),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Column(
@@ -47,11 +50,14 @@ class ProfileCard extends StatelessWidget {
         Transform.translate(
           offset: Offset(0, -70),
           child: ClipOval(
-            child: Image.asset(
-              'assets/images/Me.JPEG',
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
+            child: Transform.scale(
+              scale: 2, // increase to zoom in more, decrease to zoom out
+              child: Image.asset(
+                'assets/images/MyPic.png',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
@@ -66,7 +72,7 @@ class ProfileCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade500,
+                  color: Color(0xFF3B7597),
                   fontFamily: 'roboto',
                 ),
               ),
@@ -92,9 +98,11 @@ class StatsRow extends StatelessWidget {
 
   Widget _statCard(String value, String label) {
     return Card(
+      elevation: 8,
+      shadowColor: Colors.black,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.lightBlue, width: 0.5),
+        side: BorderSide(color: Color(0xFF6FD1D7), width: 0.5),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -134,7 +142,7 @@ class StatsRow extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: Card(
-                  color: Colors.blue.shade500,
+                  color: Color(0xFF6FD1D7),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
