@@ -178,12 +178,14 @@ class Item {
   final String title;
   final String? description;
   final String location;
+  final bool found; // true = found item, false = still lost
 
   Item({
     required this.id,
     required this.title,
     this.description,
     required this.location,
+    this.found = false,
   });
 }
 
@@ -221,6 +223,15 @@ class ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Status-driven colors: amber for still lost, green for found.
+    final statusColor = item.found
+        ? const Color(0xFF52916B)
+        : const Color(0xFFC97A2B);
+    final statusLabel = item.found ? 'Found' : 'Lost';
+    final statusIcon = item.found
+        ? Icons.check_circle_outline
+        : Icons.help_outline;
+
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -250,14 +261,46 @@ class ItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(statusIcon, size: 12, color: statusColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              statusLabel,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -329,6 +372,7 @@ class _AddItemCardState extends State<AddItemCard> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
+  bool _found = false;
 
   @override
   void dispose() {
@@ -347,6 +391,7 @@ class _AddItemCardState extends State<AddItemCard> {
             ? null
             : _descriptionController.text,
         location: _locationController.text,
+        found: _found,
       );
 
       widget.onSubmit(newItem);
@@ -389,6 +434,11 @@ class _AddItemCardState extends State<AddItemCard> {
               ),
             ),
             const SizedBox(height: 16),
+            _StatusToggle(
+              found: _found,
+              onChanged: (value) => setState(() => _found = value),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _titleController,
               decoration: _fieldDecoration('Title', colorScheme),
@@ -453,6 +503,7 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _locationController;
+  late bool _found;
 
   @override
   void initState() {
@@ -462,6 +513,7 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
       text: widget.item.description ?? '',
     );
     _locationController = TextEditingController(text: widget.item.location);
+    _found = widget.item.found;
   }
 
   @override
@@ -481,6 +533,7 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
             ? null
             : _descriptionController.text,
         location: _locationController.text,
+        found: _found,
       );
 
       widget.onSubmit(updatedItem);
@@ -523,6 +576,11 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
               ),
             ),
             const SizedBox(height: 16),
+            _StatusToggle(
+              found: _found,
+              onChanged: (value) => setState(() => _found = value),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _titleController,
               decoration: _fieldDecoration('Title', colorScheme),
@@ -564,6 +622,93 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
               ),
               onPressed: _submit,
               child: const Text('Save Changes'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Segmented Lost/Found toggle used in both the add and edit forms.
+class _StatusToggle extends StatelessWidget {
+  final bool found;
+  final ValueChanged<bool> onChanged;
+
+  const _StatusToggle({required this.found, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: _StatusOption(
+              label: 'Lost',
+              icon: Icons.help_outline,
+              color: const Color(0xFFC97A2B),
+              selected: !found,
+              onTap: () => onChanged(false),
+            ),
+          ),
+          Expanded(
+            child: _StatusOption(
+              label: 'Found',
+              icon: Icons.check_circle_outline,
+              color: const Color(0xFF52916B),
+              selected: found,
+              onTap: () => onChanged(true),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _StatusOption({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: selected ? color : Colors.grey[500]),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: selected ? color : Colors.grey[500],
+              ),
             ),
           ],
         ),
