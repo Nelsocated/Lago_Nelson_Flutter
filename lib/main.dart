@@ -178,7 +178,7 @@ class Item {
   final String title;
   final String? description;
   final String location;
-  final bool found; // true = found item, false = still lost
+  final bool found;
 
   Item({
     required this.id,
@@ -222,8 +222,6 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    // Status-driven colors: amber for still lost, green for found.
     final statusColor = item.found
         ? const Color(0xFF52916B)
         : const Color(0xFFC97A2B);
@@ -630,7 +628,6 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
   }
 }
 
-/// Segmented Lost/Found toggle used in both the add and edit forms.
 class _StatusToggle extends StatelessWidget {
   final bool found;
   final ValueChanged<bool> onChanged;
