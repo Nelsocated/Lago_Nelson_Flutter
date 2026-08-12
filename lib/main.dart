@@ -34,7 +34,7 @@ class MembershipCardScreen extends StatefulWidget {
 
 class _MembershipCardScreenState extends State<MembershipCardScreen> {
   String _memberName = 'Nelson Lago III';
-  String _memberId = '2024-SE-00123';
+  String _memberId = '25-1854-57';
   String _orgName = 'Society of Software Engineering Students';
   String _photoUrl = 'https://relaycdn.vercel.app/p/8umfet.JPG';
   Uri _orgUrl = Uri.parse('https://cpu.edu.ph');
@@ -162,7 +162,7 @@ class _MembershipCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'CENTRAL PHILIPPINE\nUNIVERSITY',
+                          'CENTRAL PHILIPPINE UNIVERSITY',
                           style: GoogleFonts.roboto(
                             color: Colors.white,
                             fontSize: 11,
