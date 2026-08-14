@@ -4,6 +4,10 @@ void main() {
   runApp(MyApp(item: ItemCrud()));
 }
 
+// ============================================================
+// APP ROOT
+// ============================================================
+
 class MyApp extends StatelessWidget {
   final ItemCrud item;
 
@@ -27,6 +31,53 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ============================================================
+// MODEL
+// ============================================================
+
+class Item {
+  String id;
+  String title;
+  String? description;
+  String location;
+  bool found;
+
+  Item({
+    required this.id,
+    required this.title,
+    this.description,
+    required this.location,
+    this.found = false,
+  });
+}
+
+// ============================================================
+// CRUD (pure data layer, no widgets in here)
+// ============================================================
+
+class ItemCrud {
+  final List<Item> _items = [];
+
+  void addItem(Item item) {
+    _items.add(item);
+  }
+
+  List<Item> getItems() {
+    return _items;
+  }
+
+  void updateItem(String id, Item newItem) {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index != -1) {
+      _items[index] = newItem;
+    }
+  }
+
+  void deleteItem(String id) {
+    _items.removeWhere((item) => item.id == id);
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title, required this.item});
 
@@ -38,20 +89,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _openAddItemSheet() {
+  static const double maxContentWidth = 480;
+
+  void _openAddSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: AddItemCard(
+      builder: (context) => _ConstrainedSheet(
+        maxWidth: maxContentWidth,
+        child: ItemFormCard(
           onSubmit: (newItem) {
-            setState(() {
-              widget.item.addItem(newItem);
-            });
+            setState(() => widget.item.addItem(newItem));
             Navigator.pop(context);
           },
         ),
@@ -64,16 +113,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: UpdateItemCard(
-          item: item,
+      builder: (context) => _ConstrainedSheet(
+        maxWidth: maxContentWidth,
+        child: ItemFormCard(
+          existingItem: item,
           onSubmit: (updatedItem) {
-            setState(() {
-              widget.item.updateItem(updatedItem.id, updatedItem);
-            });
+            setState(() => widget.item.updateItem(updatedItem.id, updatedItem));
             Navigator.pop(context);
           },
         ),
@@ -105,9 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (confirmed == true) {
-      setState(() {
-        widget.item.deleteItem(item.id);
-      });
+      setState(() => widget.item.deleteItem(item.id));
     }
   }
 
@@ -150,20 +193,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 80),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final currentItem = items[index];
-                return ItemCard(
-                  item: currentItem,
-                  onEdit: () => _openEditSheet(currentItem),
-                  onDelete: () => _confirmDelete(currentItem),
-                );
-              },
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: maxContentWidth),
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 80),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final currentItem = items[index];
+                    return ItemCard(
+                      item: currentItem,
+                      onEdit: () => _openEditSheet(currentItem),
+                      onDelete: () => _confirmDelete(currentItem),
+                    );
+                  },
+                ),
+              ),
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAddItemSheet,
+        onPressed: _openAddSheet,
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
@@ -173,42 +221,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Item {
-  final String id;
-  final String title;
-  final String? description;
-  final String location;
-  final bool found;
+class _ConstrainedSheet extends StatelessWidget {
+  final double maxWidth;
+  final Widget child;
 
-  Item({
-    required this.id,
-    required this.title,
-    this.description,
-    required this.location,
-    this.found = false,
-  });
-}
+  const _ConstrainedSheet({required this.maxWidth, required this.child});
 
-class ItemCrud {
-  final List<Item> _items = [];
-
-  void addItem(Item item) {
-    _items.add(item);
-  }
-
-  List<Item> getItems() {
-    return _items;
-  }
-
-  void updateItem(String id, Item newItem) {
-    final index = _items.indexWhere((item) => item.id == id);
-    if (index != -1) {
-      _items[index] = newItem;
-    }
-  }
-
-  void deleteItem(String id) {
-    _items.removeWhere((item) => item.id == id);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: child,
+        ),
+      ),
+    );
   }
 }
 
@@ -273,30 +304,10 @@ class ItemCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(statusIcon, size: 12, color: statusColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              statusLabel,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: statusColor,
-                              ),
-                            ),
-                          ],
-                        ),
+                      _StatusPill(
+                        color: statusColor,
+                        icon: statusIcon,
+                        label: statusLabel,
                       ),
                     ],
                   ),
@@ -356,162 +367,75 @@ class ItemCard extends StatelessWidget {
   }
 }
 
-class AddItemCard extends StatefulWidget {
-  final void Function(Item item) onSubmit;
+class _StatusPill extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String label;
 
-  const AddItemCard({super.key, required this.onSubmit});
+  const _StatusPill({
+    required this.color,
+    required this.icon,
+    required this.label,
+  });
 
   @override
-  State<AddItemCard> createState() => _AddItemCardState();
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _AddItemCardState extends State<AddItemCard> {
+class ItemFormCard extends StatefulWidget {
+  final Item? existingItem;
+  final void Function(Item item) onSubmit;
+
+  const ItemFormCard({super.key, this.existingItem, required this.onSubmit});
+
+  bool get isEditing => existingItem != null;
+
+  @override
+  State<ItemFormCard> createState() => _ItemFormCardState();
+}
+
+class _ItemFormCardState extends State<ItemFormCard> {
   final _formKey = GlobalKey<FormState>();
+
+  // Plain final fields, no `late` needed — they just start empty.
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   bool _found = false;
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      final newItem = Item(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _titleController.text,
-        description: _descriptionController.text.isEmpty
-            ? null
-            : _descriptionController.text,
-        location: _locationController.text,
-        found: _found,
-      );
-
-      widget.onSubmit(newItem);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            Text(
-              'Report an Item',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _StatusToggle(
-              found: _found,
-              onChanged: (value) => setState(() => _found = value),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _titleController,
-              decoration: _fieldDecoration('Title', colorScheme),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Title is required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: _fieldDecoration(
-                'Description (optional)',
-                colorScheme,
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _locationController,
-              decoration: _fieldDecoration('Location', colorScheme),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Location is required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: _submit,
-              child: const Text('Add Item'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class UpdateItemCard extends StatefulWidget {
-  final Item item;
-  final void Function(Item updatedItem) onSubmit;
-
-  const UpdateItemCard({super.key, required this.item, required this.onSubmit});
-
-  @override
-  State<UpdateItemCard> createState() => _UpdateItemCardState();
-}
-
-class _UpdateItemCardState extends State<UpdateItemCard> {
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
-  late final TextEditingController _locationController;
-  late bool _found;
-
-  @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.item.title);
-    _descriptionController = TextEditingController(
-      text: widget.item.description ?? '',
-    );
-    _locationController = TextEditingController(text: widget.item.location);
-    _found = widget.item.found;
+    final existing = widget.existingItem;
+    if (existing != null) {
+      _titleController.text = existing.title;
+      _descriptionController.text = existing.description ?? '';
+      _locationController.text = existing.location;
+      _found = existing.found;
+    }
   }
 
   @override
@@ -523,19 +447,21 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
   }
 
   void _submit() {
-    if (_formKey.currentState!.validate()) {
-      final updatedItem = Item(
-        id: widget.item.id, // keep the same id
-        title: _titleController.text,
-        description: _descriptionController.text.isEmpty
-            ? null
-            : _descriptionController.text,
-        location: _locationController.text,
-        found: _found,
-      );
+    if (!_formKey.currentState!.validate()) return;
 
-      widget.onSubmit(updatedItem);
-    }
+    final item = Item(
+      id:
+          widget.existingItem?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      title: _titleController.text,
+      description: _descriptionController.text.isEmpty
+          ? null
+          : _descriptionController.text,
+      location: _locationController.text,
+      found: _found,
+    );
+
+    widget.onSubmit(item);
   }
 
   @override
@@ -566,7 +492,7 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
               ),
             ),
             Text(
-              'Edit Item',
+              widget.isEditing ? 'Edit Item' : 'Report an Item',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -582,12 +508,8 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
             TextFormField(
               controller: _titleController,
               decoration: _fieldDecoration('Title', colorScheme),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Title is required';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'Title is required' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -602,12 +524,9 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
             TextFormField(
               controller: _locationController,
               decoration: _fieldDecoration('Location', colorScheme),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Location is required';
-                }
-                return null;
-              },
+              validator: (value) => (value == null || value.isEmpty)
+                  ? 'Location is required'
+                  : null,
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -619,13 +538,29 @@ class _UpdateItemCardState extends State<UpdateItemCard> {
                 ),
               ),
               onPressed: _submit,
-              child: const Text('Save Changes'),
+              child: Text(widget.isEditing ? 'Save Changes' : 'Add Item'),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+InputDecoration _fieldDecoration(String label, ColorScheme colorScheme) {
+  return InputDecoration(
+    labelText: label,
+    filled: true,
+    fillColor: colorScheme.primary.withValues(alpha: 0.05),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+    ),
+  );
 }
 
 class _StatusToggle extends StatelessWidget {
@@ -712,20 +647,4 @@ class _StatusOption extends StatelessWidget {
       ),
     );
   }
-}
-
-InputDecoration _fieldDecoration(String label, ColorScheme colorScheme) {
-  return InputDecoration(
-    labelText: label,
-    filled: true,
-    fillColor: colorScheme.primary.withValues(alpha: 0.05),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: BorderSide.none,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
-    ),
-  );
 }
