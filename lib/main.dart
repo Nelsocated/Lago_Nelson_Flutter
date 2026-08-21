@@ -1,101 +1,69 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Flutter Demo', home: const CounterScreen());
+    return MaterialApp(title: 'Mini Playlist', home: const PlaylistScreen());
   }
 }
 
-class CounterScreen extends StatefulWidget {
-  const CounterScreen({super.key});
+class PlaylistScreen extends StatelessWidget {
+  const PlaylistScreen({super.key});
 
-  @override
-  State<CounterScreen> createState() => _CounterScreenState();
-}
-
-class _CounterScreenState extends State<CounterScreen> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _decrementCounter() {
-    setState(() {
-      if (_counter <= 0) {
-        return;
-      }
-      _counter--;
-    });
-  }
+  final List<String> songs = const [
+    'Sunset Drive',
+    'Strategy (feat. Megan Thee Stallion)',
+    'Upuan by Gloc-9',
+    'Kumilos (feat. Higit Sa Pag-Ibit, The Musical)',
+    'Aint In LA by ADELA',
+    'Two Slow Dancer by Mitski',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade50,
-      appBar: AppBar(
-        title: const Text('My First Flutter App'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-      ),
-      body: Stack(
-        children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('You have pushed the button this many times:'),
-                Text(
-                  '$_counter',
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
+      appBar: AppBar(title: const Text('My Playlist')),
+      body: ListView.builder(
+        itemCount: songs.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: const Icon(Icons.music_note),
+            title: Text(songs[index]),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      NowPlayingScreen(songTitle: songs[index]),
                 ),
-              ],
-            ),
-          ),
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 20.0),
-              child: Text(
-                "Created by: Nelson Lago",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.deepPurple,
-                ),
-              ),
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _incrementCounter,
-            heroTag: 'increment',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton(
-            onPressed: _decrementCounter,
-            heroTag: 'decrement',
-            backgroundColor: Colors.deepPurple.shade200,
-            child: const Icon(Icons.remove),
-          ),
-        ],
+    );
+  }
+}
+
+class NowPlayingScreen extends StatelessWidget {
+  final String songTitle;
+  const NowPlayingScreen({super.key, required this.songTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Now Playing")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Playing: $songTitle'),
+        ),
       ),
     );
   }
