@@ -1,100 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_act/category_screen.dart';
+import 'package:flutter_act/home_screen.dart';
+import 'package:flutter_act/profile_screen.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MiniStore());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MiniStore extends StatelessWidget {
+  const MiniStore({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Flutter Demo', home: const CounterScreen());
+    return MaterialApp(
+      title: 'Mini Store',
+      debugShowCheckedModeBanner: false,
+      home: MainScreen(),
+    );
   }
 }
 
-class CounterScreen extends StatefulWidget {
-  const CounterScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<CounterScreen> createState() => _CounterScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _CounterScreenState extends State<CounterScreen> {
-  int _counter = 0;
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    CategoryScreen(),
+    ProfileScreen(),
+  ];
 
-  void _decrementCounter() {
+  void _onItemTapped(int index) {
     setState(() {
-      if (_counter <= 0) {
-        return;
-      }
-      _counter--;
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade50,
-      appBar: AppBar(
-        title: const Text('My First Flutter App'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-      ),
-      body: Stack(
-        children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('You have pushed the button this many times:'),
-                Text(
-                  '$_counter',
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+      body: IndexedStack(index: _selectedIndex, children: _screens),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view),
+            label: 'Categories',
           ),
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 20.0),
-              child: Text(
-                "Created by: Nelson Lago",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.deepPurple,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _incrementCounter,
-            heroTag: 'increment',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton(
-            onPressed: _decrementCounter,
-            heroTag: 'decrement',
-            backgroundColor: Colors.deepPurple.shade200,
-            child: const Icon(Icons.remove),
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
